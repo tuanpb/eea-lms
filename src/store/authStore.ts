@@ -107,8 +107,31 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       syncSession(nextSession, set, logout, event);
     });
 
+    // Bật Realtime listener cho bảng profiles để cập nhật xu ngay lập tức khi nạp tiền
+    const profileSubscription = supabase
+      .channel('public:profiles')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        (payload) => {
+          const { currentUser } = get();
+          // Kiểm tra xem bản ghi update có phải là của user hiện tại không
+          if (currentUser && payload.new.id === currentUser.id) {
+            set({
+              currentUser: {
+                ...currentUser,
+                coin: payload.new.coin,
+                lastSessionId: payload.new.last_session_id
+              }
+            });
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       subscription.unsubscribe();
+      supabase.removeChannel(profileSubscription);
     };
   },
 

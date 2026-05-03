@@ -33,9 +33,13 @@ const AppLayout = () => {
           filter: `id=eq.${currentUser.id}`,
         },
         (payload) => {
-          if (payload.new && payload.new.coin !== payload.old.coin) {
-            const addedCoin = (payload.new.coin || 0) - (payload.old.coin || 0);
-            if (addedCoin > 0) {
+          if (payload.new) {
+            // Lấy số dư hiện tại từ store vì payload.old mặc định không chứa dữ liệu đầy đủ
+            const currentStoreCoin = useAuthStore.getState().currentUser?.coin || 0;
+            const newCoin = payload.new.coin || 0;
+            
+            if (newCoin > currentStoreCoin) {
+              const addedCoin = newCoin - currentStoreCoin;
               notification.success({
                 message: 'Nạp tiền thành công!',
                 description: `Tài khoản của bạn đã được cộng ${addedCoin.toLocaleString()} xu.`,
@@ -130,7 +134,7 @@ const AppLayout = () => {
               letterSpacing: -0.5,
             }}
           >
-            ICTU-LMS
+            EEA-LMS
           </Text>
         </div>
 
@@ -279,7 +283,7 @@ const AppLayout = () => {
             marginTop: 'auto',
           }}
         >
-          © 2026 ICTU-LMS • Đề cương trực tuyến
+          © 2026 EEA-LMS • Đề cương trực tuyến
         </Footer>
       )}
 

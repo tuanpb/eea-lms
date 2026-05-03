@@ -135,18 +135,54 @@ export const useExamStore = create<ExamState>()(
 
           if (data && data.questions) {
             const subject = get().subjects.find(s => s.id === subjectId);
-            const answers: Answer[] = data.questions.map((q: { qHtml?: string; optHtmlA?: string; optHtmlB?: string; optHtmlC?: string; optHtmlD?: string; correctIndex?: number }, index: number) => ({
-              questionNumber: index + 1,
-              // questionText: q.question,
-              questionText: q.qHtml,
-              options: {
-                A: q.optHtmlA,
-                B: q.optHtmlB,
-                C: q.optHtmlC,
-                D: q.optHtmlD,
-              },
-              correctAnswer: ['A', 'B', 'C', 'D'][q.correctIndex || 0] as 'A' | 'B' | 'C' | 'D',
-            }));
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const answers: Answer[] = data.questions.map((q: any, index: number) => {
+              // Kiểm tra nếu là cấu trúc cũ (có qHtml hoặc optHtmlA)
+              // if (q.qHtml || q.optHtmlA) {
+              //   return {
+              //     questionNumber: index + 1,
+              //     questionText: q.qHtml || q.question,
+              //     options: {
+              //       A: q.optHtmlA || q.optA,
+              //       B: q.optHtmlB || q.optB,
+              //       C: q.optHtmlC || q.optC,
+              //       D: q.optHtmlD || q.optD,
+              //     },
+              //     correctAnswer: ['A', 'B', 'C', 'D'][q.correctIndex || 0] as 'A' | 'B' | 'C' | 'D',
+              //   };
+              // }
+
+              // Cấu trúc mới
+              const options: Record<string, string> = { A: '', B: '', C: '', D: '' };
+              let correctAnswer: 'A' | 'B' | 'C' | 'D' = 'A';
+
+              if (q.options && Array.isArray(q.options)) {
+                q.options.forEach((opt: any, i: number) => {
+                  const label = ['A', 'B', 'C', 'D'][i] as 'A' | 'B' | 'C' | 'D';
+                  if (label) {
+                    options[label] = opt.texthtml || opt.text;
+
+                    // Xác định đáp án đúng bằng cách so khớp nội dung
+                    // q.answerhtml thường chứa nội dung của đáp án đúng
+                    const optContent = opt.texthtml || opt.text;
+                    const isCorrect = (q.answerhtml && q.answerhtml.includes(optContent)) ||
+                      (q.answer && q.answer.includes(opt.text));
+
+                    if (isCorrect) {
+                      correctAnswer = label;
+                    }
+                  }
+                });
+              }
+
+              return {
+                questionNumber: index + 1,
+                questionText: q.questionhtml || q.questiontext,
+                options: options as { A: string; B: string; C: string; D: string },
+                correctAnswer,
+              };
+            });
 
             const dynamicExam: Exam = {
               id: `dynamic-${subjectId}`,
@@ -245,22 +281,22 @@ export const useExamStore = create<ExamState>()(
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'subjects' },
             (payload) => {
-              const updatedSubject = payload.new as { 
-                id: string; 
-                unlock_coin: number; 
-                rental_coin: number; 
-                active: number 
+              const updatedSubject = payload.new as {
+                id: string;
+                unlock_coin: number;
+                rental_coin: number;
+                active: number
               };
-              
+
               set((state) => ({
                 subjects: state.subjects.map((s) =>
                   s.id === updatedSubject.id
                     ? {
-                        ...s,
-                        unlockCoin: Number(updatedSubject.unlock_coin) || 0,
-                        rentalCoin: Number(updatedSubject.rental_coin) || 0,
-                        active: updatedSubject.active,
-                      }
+                      ...s,
+                      unlockCoin: Number(updatedSubject.unlock_coin) || 0,
+                      rentalCoin: Number(updatedSubject.rental_coin) || 0,
+                      active: updatedSubject.active,
+                    }
                     : s
                 ),
               }));

@@ -256,7 +256,7 @@ const AnswerKeyPage = () => {
           display: 'flex',
           alignItems: 'flex-start',
           gap: 12,
-          padding: '12px 14px',
+          padding: '4px 6px',
           borderRadius: 10,
           backgroundColor: bgColor,
           border: `1px solid ${borderColor}`,
@@ -266,8 +266,8 @@ const AnswerKeyPage = () => {
       >
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 24,
+            height: 24,
             borderRadius: '50%',
             backgroundColor: labelBg,
             color: labelColor,
