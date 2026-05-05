@@ -1,24 +1,33 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, Typography, Flex, Row, Col, Button, Space, Badge, Divider, Tag, message } from 'antd';
 import { CreditCard, QrCode, Info, Copy, ArrowDownRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useExamStore } from '../../store/examStore';
+import { supabase } from '../../lib/supabase';
 
 const { Text } = Typography;
 
 const WalletPage = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
 
-  const subjects = useExamStore((state) => state.subjects);
-  const unlockedSubjectIds = useExamStore((state) => state.unlockedSubjectIds);
+  const [usedCoins, setUsedCoins] = useState(0);
 
-  const usedCoins = useMemo(() => {
-    return unlockedSubjectIds.reduce((total, id) => {
-      const subject = subjects.find(s => s.id === id);
-      return total + (subject?.unlockCoin || 0);
-    }, 0);
-  }, [unlockedSubjectIds, subjects]);
-
+  useEffect(() => {
+    const fetchUsedCoins = async () => {
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from('coin_transactions')
+        .select('amount')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'PURCHASE');
+      
+      if (!error && data) {
+        const total = data.reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+        setUsedCoins(total);
+      }
+    };
+    
+    fetchUsedCoins();
+  }, [currentUser]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -108,7 +117,7 @@ const WalletPage = () => {
                       }}>
                         <ArrowDownRight size={14} style={{ color: '#fca5a5' }} />
                         <span style={{ color: '#fef2f2', fontWeight: 500 }}>
-                          Đã sử dụng: {usedCoins.toLocaleString()} Coin
+                          Đã sử dụng: {usedCoins.toLocaleString()} Xu
                         </span>
                       </Tag>
                     </div>

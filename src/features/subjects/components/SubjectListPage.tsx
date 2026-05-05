@@ -268,6 +268,11 @@ const SubjectListPage = () => {
                   <Title level={5} style={{ margin: '0 0 8px', color: 'var(--text-primary)' }}>
                     {subject.name}
                   </Title>
+                  {subject.description && (
+                    <Text type="secondary" style={{ fontSize: 13, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {subject.description}
+                    </Text>
+                  )}
                 </Card>
               </Col>
             );
