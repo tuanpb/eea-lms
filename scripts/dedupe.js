@@ -40,21 +40,29 @@ const dedupeFile = (filePath) => {
             }
         }
 
+        // Sort questions alphabetically by questiontext
+        uniqueQuestions.sort((a, b) => {
+            const textA = (a.questiontext || '').trim().toLowerCase();
+            const textB = (b.questiontext || '').trim().toLowerCase();
+            return textA.localeCompare(textB, 'vi');
+        });
+
         const duplicatesRemoved = originalCount - uniqueQuestions.length;
 
-        if (duplicatesRemoved > 0) {
-            data.questions = uniqueQuestions;
-            
-            // Update metadata.total if it exists
-            if (data.metadata) {
-                data.metadata.total = uniqueQuestions.length;
-            }
+        data.questions = uniqueQuestions;
+        
+        // Update metadata.total if it exists
+        if (data.metadata) {
+            data.metadata.total = uniqueQuestions.length;
+        }
 
-            // Write back to file with 4-space indentation
-            fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf8');
-            console.log(`[${path.basename(filePath)}] Removed ${duplicatesRemoved} duplicates. Final count: ${uniqueQuestions.length}`);
+        // Write back to file with 4-space indentation
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf8');
+        
+        if (duplicatesRemoved > 0) {
+            console.log(`[${path.basename(filePath)}] Removed ${duplicatesRemoved} duplicates & sorted. Final count: ${uniqueQuestions.length}`);
         } else {
-            console.log(`[${path.basename(filePath)}] No duplicates found.`);
+            console.log(`[${path.basename(filePath)}] Sorted (no duplicates found). Final count: ${uniqueQuestions.length}`);
         }
     } catch (err) {
         console.error(`Error processing ${filePath}:`, err.message);

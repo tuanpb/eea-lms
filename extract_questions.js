@@ -59,6 +59,13 @@ function extractQuestions() {
     return questions;
 }
 
+let quizData = [];
+
+if (localStorage.getItem('quizData')) {
+    quizData = JSON.parse(localStorage.getItem('quizData'));
+}
+
 // Chạy hàm và in kết quả ra màn hình (dạng JSON)
 const result = extractQuestions();
-console.log(result);
+quizData.push(...result);
+localStorage.setItem('quizData', JSON.stringify(quizData));

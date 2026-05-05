@@ -138,20 +138,6 @@ export const useExamStore = create<ExamState>()(
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const answers: Answer[] = data.questions.map((q: any, index: number) => {
-              // Kiểm tra nếu là cấu trúc cũ (có qHtml hoặc optHtmlA)
-              // if (q.qHtml || q.optHtmlA) {
-              //   return {
-              //     questionNumber: index + 1,
-              //     questionText: q.qHtml || q.question,
-              //     options: {
-              //       A: q.optHtmlA || q.optA,
-              //       B: q.optHtmlB || q.optB,
-              //       C: q.optHtmlC || q.optC,
-              //       D: q.optHtmlD || q.optD,
-              //     },
-              //     correctAnswer: ['A', 'B', 'C', 'D'][q.correctIndex || 0] as 'A' | 'B' | 'C' | 'D',
-              //   };
-              // }
 
               // Cấu trúc mới
               const options: Record<string, string> = { A: '', B: '', C: '', D: '' };

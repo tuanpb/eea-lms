@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Tag, Empty, Typography, Flex, Row, Col, Card, Input, Modal, message, Checkbox, Grid } from 'antd';
-import { Search, Lock, Unlock, Download } from 'lucide-react';
+import { Search, Lock, Unlock, FileText, Printer } from 'lucide-react';
 import { useExamStore } from '../../../store/examStore';
 import { useAuthStore } from '../../../store/authStore';
 import type { Answer } from '../../../lib/types';
@@ -81,6 +81,63 @@ const AnswerKeyPage = () => {
 
   const handleExportPDF = () => {
     window.print();
+  };
+
+  const handleExportWord = () => {
+    if (!exam || !subject) return;
+
+    let htmlContent = `
+      <h1 style="text-align: center; color: #2563eb; font-family: Arial, sans-serif;">${subject.name}</h1>
+      <h3 style="text-align: center; color: #4b5563; font-family: Arial, sans-serif;">Tổng số câu hỏi: ${filteredAnswers.length} câu</h3>
+    `;
+
+    filteredAnswers.forEach((answer) => {
+      if (answer.questionText && answer.options) {
+        htmlContent += `
+          <div style="margin-bottom: 12px; font-family: Arial, sans-serif; border-top: 1px dotted #333;padding-top: 6px;">
+            <div style="margin-bottom: 0px;">${answer.questionText}</div>
+        `;
+
+        ANSWER_OPTIONS.forEach((opt) => {
+          const optionText = answer.options?.[opt] ?? opt;
+          const isCorrect = opt === answer.correctAnswer;
+
+          if (showOnlyCorrect && !isCorrect) return;
+
+          let optStyle = "margin-left: 20px; margin-bottom: 4px; padding: 0px;";
+          if (isCorrect) {
+            optStyle += " color: #10b981; font-weight: bold;";
+          }
+
+          htmlContent += `
+            <div style="${optStyle}">
+              <span style="font-weight: bold;">${opt}.</span> ${optionText}
+            </div>
+          `;
+        });
+
+        htmlContent += `</div>`;
+      }
+    });
+
+    const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+    const postHtml = "</body></html>";
+    const html = preHtml + htmlContent + postHtml;
+
+    const blob = new Blob(['\ufeff', html], {
+      type: 'application/msword'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+    downloadLink.href = url;
+    downloadLink.download = `${subject.name}_CauHoi.doc`;
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(url);
+
+    message.success('Đã xuất file Word thành công!');
   };
 
   const hasDetailedQuestions = useMemo(() => {
@@ -390,11 +447,19 @@ const AnswerKeyPage = () => {
 
           <Flex align="center" gap={16} wrap="wrap" style={{ flex: 1, justifyContent: 'flex-end' }}>
             <Button
-              icon={<Download size={16} />}
+              type="primary"
+              icon={<FileText size={16} />}
+              onClick={handleExportWord}
+              style={{ fontWeight: 500, background: '#2563eb' }}
+            >
+              Tải Word
+            </Button>
+            <Button
+              icon={<Printer size={16} />}
               onClick={handleExportPDF}
               style={{ fontWeight: 500 }}
             >
-              In
+              In / Xuất PDF
             </Button>
             <Checkbox
               checked={showOnlyCorrect}

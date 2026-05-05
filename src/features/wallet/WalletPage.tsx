@@ -145,10 +145,10 @@ const WalletPage = () => {
             >
               <Space orientation="vertical" size={16} style={{ width: '100%' }}>
                 <Flex justify="space-between" align="center">
-                  <Text type="secondary">Tên đại lý thụ hưởng</Text>
+                  <Text type="secondary">Người thụ hưởng</Text>
                   <Flex align="center" gap={8}>
                     <Text strong>NGUYEN THI MINH HANG</Text>
-                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('Phan Bình Tuấn', 'tên thụ hưởng')} />
+                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('NGUYEN THI MINH HANG', 'tên thụ hưởng')} />
                   </Flex>
                 </Flex>
                 <Divider style={{ margin: 0 }} />
@@ -156,7 +156,7 @@ const WalletPage = () => {
                   <Text type="secondary">Số tài khoản</Text>
                   <Flex align="center" gap={8}>
                     <Text strong style={{ fontSize: 16, color: 'var(--color-primary)' }}>0974106084</Text>
-                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('105882450457', 'số tài khoản')} />
+                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('0974106084', 'số tài khoản')} />
                   </Flex>
                 </Flex>
                 <Divider style={{ margin: 0 }} />
