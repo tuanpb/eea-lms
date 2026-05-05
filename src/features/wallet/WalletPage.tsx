@@ -19,13 +19,13 @@ const WalletPage = () => {
         .select('amount')
         .eq('user_id', currentUser.id)
         .eq('type', 'PURCHASE');
-      
+
       if (!error && data) {
         const total = data.reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
         setUsedCoins(total);
       }
     };
-    
+
     fetchUsedCoins();
   }, [currentUser]);
 
@@ -185,7 +185,7 @@ const WalletPage = () => {
 
               <div style={{ marginTop: 24, padding: 16, background: '#fffbeb', borderRadius: 12, border: '1px solid #fef3c7' }}>
                 <Text style={{ fontSize: 13, color: '#92400e' }}>
-                  <b>Lưu ý:</b> Vui lòng nhập đúng nội dung chuyển khoản là <b>{transferContent}</b> để hệ thống có thể tự động cộng Coin sau 1-5 phút.
+                  <b>Lưu ý:</b> Vui lòng nhập đúng nội dung chuyển khoản là <b>{transferContent}</b> để hệ thống có thể tự động cộng Xu sau 1-5 phút.
                 </Text>
               </div>
             </Card>
