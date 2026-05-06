@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Tag, Empty, Typography, Flex, Row, Col, Card, Input, Modal, message, Checkbox, Grid } from 'antd';
-import { Search, Lock, Unlock, FileText, Printer } from 'lucide-react';
+import { Search, Lock, Unlock, Printer } from 'lucide-react';
 import { useExamStore } from '../../../store/examStore';
 import { useAuthStore } from '../../../store/authStore';
 import type { Answer } from '../../../lib/types';
@@ -139,6 +139,8 @@ const AnswerKeyPage = () => {
 
     message.success('Đã xuất file Word thành công!');
   };
+
+  void handleExportWord;
 
   const hasDetailedQuestions = useMemo(() => {
     if (!exam) return false;
@@ -446,20 +448,20 @@ const AnswerKeyPage = () => {
           </div>
 
           <Flex align="center" gap={16} wrap="wrap" style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Button
+            {/* <Button
               type="primary"
               icon={<FileText size={16} />}
               onClick={handleExportWord}
               style={{ fontWeight: 500, background: '#2563eb' }}
             >
               Tải Word
-            </Button>
+            </Button> */}
             <Button
               icon={<Printer size={16} />}
               onClick={handleExportPDF}
               style={{ fontWeight: 500 }}
             >
-              In / Xuất PDF
+              In
             </Button>
             <Checkbox
               checked={showOnlyCorrect}

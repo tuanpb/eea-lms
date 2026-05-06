@@ -1,13 +1,15 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Card, Typography, Flex, Row, Col, Button, Space, Badge, Divider, Tag, message } from 'antd';
+import { Card, Typography, Flex, Row, Col, Button, Space, Badge, Divider, Tag, message, Grid } from 'antd';
 import { CreditCard, QrCode, Info, Copy, ArrowDownRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { supabase } from '../../lib/supabase';
 
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 const WalletPage = () => {
   const currentUser = useAuthStore((state) => state.currentUser);
+  const screens = useBreakpoint();
 
   const [usedCoins, setUsedCoins] = useState(0);
 
@@ -142,53 +144,55 @@ const WalletPage = () => {
             </Card>
 
             {/* Thẻ thông tin nạp tiền */}
-            <Card
-              title={<Flex align="center" gap={8}><CreditCard size={18} /><span>Thông tin nạp tiền</span></Flex>}
-              variant="borderless"
-              style={{
-                borderRadius: 20,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                background: 'rgba(255,255,255,0.6)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-                <Flex justify="space-between" align="center">
-                  <Text type="secondary">Người thụ hưởng</Text>
-                  <Flex align="center" gap={8}>
-                    <Text strong>NGUYEN THI MINH HANG</Text>
-                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('NGUYEN THI MINH HANG', 'tên thụ hưởng')} />
+            {screens.md && (
+              <Card
+                title={<Flex align="center" gap={8}><CreditCard size={18} /><span>Thông tin nạp tiền</span></Flex>}
+                variant="borderless"
+                style={{
+                  borderRadius: 20,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                  background: 'rgba(255,255,255,0.6)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                <Space orientation="vertical" size={16} style={{ width: '100%' }}>
+                  <Flex justify="space-between" align="center">
+                    <Text type="secondary">Người thụ hưởng</Text>
+                    <Flex align="center" gap={8}>
+                      <Text strong>NGUYEN THI MINH HANG</Text>
+                      <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('NGUYEN THI MINH HANG', 'tên thụ hưởng')} />
+                    </Flex>
                   </Flex>
-                </Flex>
-                <Divider style={{ margin: 0 }} />
-                <Flex justify="space-between" align="center">
-                  <Text type="secondary">Số tài khoản</Text>
-                  <Flex align="center" gap={8}>
-                    <Text strong style={{ fontSize: 16, color: 'var(--color-primary)' }}>0974106084</Text>
-                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('0974106084', 'số tài khoản')} />
+                  <Divider style={{ margin: 0 }} />
+                  <Flex justify="space-between" align="center">
+                    <Text type="secondary">Số tài khoản</Text>
+                    <Flex align="center" gap={8}>
+                      <Text strong style={{ fontSize: 16, color: 'var(--color-primary)' }}>0974106084</Text>
+                      <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard('0974106084', 'số tài khoản')} />
+                    </Flex>
                   </Flex>
-                </Flex>
-                <Divider style={{ margin: 0 }} />
-                <Flex justify="space-between" align="center">
-                  <Text type="secondary">Ngân hàng</Text>
-                  <Tag color="green" style={{ fontWeight: 600 }}>VPBank</Tag>
-                </Flex>
-                <Divider style={{ margin: 0 }} />
-                <Flex justify="space-between" align="center">
-                  <Text type="secondary">Nội dung chuyển khoản</Text>
-                  <Flex align="center" gap={8}>
-                    <Text strong style={{ color: '#e11d48' }}>{transferContent}</Text>
-                    <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard(transferContent, 'nội dung')} />
+                  <Divider style={{ margin: 0 }} />
+                  <Flex justify="space-between" align="center">
+                    <Text type="secondary">Ngân hàng</Text>
+                    <Tag color="green" style={{ fontWeight: 600 }}>VPBank</Tag>
                   </Flex>
-                </Flex>
-              </Space>
+                  <Divider style={{ margin: 0 }} />
+                  <Flex justify="space-between" align="center">
+                    <Text type="secondary">Nội dung chuyển khoản</Text>
+                    <Flex align="center" gap={8}>
+                      <Text strong style={{ color: '#e11d48' }}>{transferContent}</Text>
+                      <Button type="text" size="small" icon={<Copy size={12} />} onClick={() => copyToClipboard(transferContent, 'nội dung')} />
+                    </Flex>
+                  </Flex>
+                </Space>
 
-              <div style={{ marginTop: 24, padding: 16, background: '#fffbeb', borderRadius: 12, border: '1px solid #fef3c7' }}>
-                <Text style={{ fontSize: 13, color: '#92400e' }}>
-                  <b>Lưu ý:</b> Vui lòng nhập đúng nội dung chuyển khoản là <b>{transferContent}</b> để hệ thống có thể tự động cộng Xu sau 1-5 phút.
-                </Text>
-              </div>
-            </Card>
+                <div style={{ marginTop: 24, padding: 16, background: '#fffbeb', borderRadius: 12, border: '1px solid #fef3c7' }}>
+                  <Text style={{ fontSize: 13, color: '#92400e' }}>
+                    <b>Lưu ý:</b> Vui lòng nhập đúng nội dung chuyển khoản là <b>{transferContent}</b> để hệ thống có thể tự động cộng Xu sau 1-5 phút.
+                  </Text>
+                </div>
+              </Card>
+            )}
           </Space>
         </Col>
 
