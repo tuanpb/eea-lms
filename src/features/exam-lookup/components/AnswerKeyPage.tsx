@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Tag, Empty, Typography, Flex, Row, Col, Card, Input, Modal, message, Checkbox, Grid } from 'antd';
-import { Search, Lock, Unlock, Printer } from 'lucide-react';
+import { Search, Lock, Unlock, Printer, FileText } from 'lucide-react';
 import { useExamStore } from '../../../store/examStore';
 import { useAuthStore } from '../../../store/authStore';
 import type { Answer } from '../../../lib/types';
@@ -9,6 +9,32 @@ import type { Answer } from '../../../lib/types';
 const { Title, Text } = Typography;
 
 const ANSWER_OPTIONS = ['A', 'B', 'C', 'D'] as const;
+
+const DebouncedSearchInput = ({ value, onChange, placeholder, style, allowClear, prefix }: any) => {
+  const [innerValue, setInnerValue] = useState(value);
+
+  useEffect(() => {
+    setInnerValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onChange(innerValue);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [innerValue, onChange]);
+
+  return (
+    <Input
+      prefix={prefix}
+      placeholder={placeholder}
+      value={innerValue}
+      onChange={(event) => setInnerValue(event.target.value)}
+      allowClear={allowClear}
+      style={style}
+    />
+  );
+};
 
 const AnswerKeyPage = () => {
   const { subjectId } = useParams<{ subjectId?: string }>();
@@ -28,6 +54,8 @@ const AnswerKeyPage = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+
+  const [showButton, setShowButton] = useState(false);
 
   const subject = useMemo(() => {
     return subjects.find((item) => item.id === subjectId);
@@ -147,30 +175,34 @@ const AnswerKeyPage = () => {
     return exam.answers.some((answer) => answer.questionText && answer.options);
   }, [exam]);
 
-  const [searchValue, setSearchValue] = useState('');
   const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
   const [showOnlyCorrect, setShowOnlyCorrect] = useState(false);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchValue(searchValue);
-    }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchValue]);
+  const [sortByAlphabet, setSortByAlphabet] = useState(false);
 
   const filteredAnswers = useMemo(() => {
     if (!exam) return [];
-    if (!debouncedSearchValue) return exam.answers;
-    const query = debouncedSearchValue.toLowerCase();
-    return exam.answers.filter(
-      (answer) =>
-        answer.questionText?.toLowerCase().includes(query) ||
-        answer.questionNumber.toString().includes(query)
-    );
-  }, [debouncedSearchValue, exam]);
+
+    let result = exam.answers;
+
+    if (debouncedSearchValue) {
+      const query = debouncedSearchValue.toLowerCase();
+      result = result.filter(
+        (answer) =>
+          answer.questionText?.toLowerCase().includes(query) ||
+          answer.questionNumber.toString().includes(query)
+      );
+    }
+
+    if (sortByAlphabet) {
+      result = [...result].sort((a, b) => {
+        const textA = (a.questionText || '').replace(/<[^>]+>/g, '').trim().toLowerCase();
+        const textB = (b.questionText || '').replace(/<[^>]+>/g, '').trim().toLowerCase();
+        return textA.localeCompare(textB, 'vi');
+      });
+    }
+
+    return result;
+  }, [debouncedSearchValue, exam, sortByAlphabet]);
 
   if (loadingQuestions) {
     return (
@@ -448,21 +480,35 @@ const AnswerKeyPage = () => {
           </div>
 
           <Flex align="center" gap={16} wrap="wrap" style={{ flex: 1, justifyContent: 'flex-end' }}>
-            {/* <Button
-              type="primary"
-              icon={<FileText size={16} />}
-              onClick={handleExportWord}
-              style={{ fontWeight: 500, background: '#2563eb' }}
-            >
-              Tải Word
-            </Button> */}
-            <Button
-              icon={<Printer size={16} />}
-              onClick={handleExportPDF}
-              style={{ fontWeight: 500 }}
-            >
-              In
-            </Button>
+            {
+              showButton && (
+                <>
+                  <Button
+                    type="primary"
+                    icon={<FileText size={16} />}
+                    onClick={handleExportWord}
+                    style={{ fontWeight: 500, background: '#2563eb' }}
+                  >
+                    Tải Word
+                  </Button>
+                  <Button
+                    icon={<Printer size={16} />}
+                    onClick={handleExportPDF}
+                    style={{ fontWeight: 500 }}
+                  >
+                    In
+                  </Button>
+                  <Checkbox
+                    checked={sortByAlphabet}
+                    onChange={(e) => setSortByAlphabet(e.target.checked)}
+                    style={{ fontWeight: 500 }}
+                  >
+                    Sắp xếp A-Z
+                  </Checkbox>
+                </>
+              )
+            }
+
             <Checkbox
               checked={showOnlyCorrect}
               onChange={(e) => setShowOnlyCorrect(e.target.checked)}
@@ -471,11 +517,11 @@ const AnswerKeyPage = () => {
               Ẩn đáp án sai
             </Checkbox>
             <div style={{ maxWidth: 320, width: '100%' }}>
-              <Input
+              <DebouncedSearchInput
                 prefix={<Search size={16} style={{ color: 'var(--text-muted)' }} />}
                 placeholder="Tìm câu hỏi theo số hoặc nội dung..."
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
+                value={debouncedSearchValue}
+                onChange={setDebouncedSearchValue}
                 allowClear
                 style={{ borderRadius: 20 }}
               />

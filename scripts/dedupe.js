@@ -16,7 +16,7 @@ const dedupeFile = (filePath) => {
     try {
         const content = fs.readFileSync(filePath, 'utf8');
         const data = JSON.parse(content);
-        
+
         if (!data.questions || !Array.isArray(data.questions)) {
             console.log(`[${path.basename(filePath)}] Skipped (no questions array).`);
             return;
@@ -30,7 +30,7 @@ const dedupeFile = (filePath) => {
             // Normalize text for comparison: trim and collapse multiple spaces
             const qText = q.questiontext ? q.questiontext.trim().replace(/\s+/g, ' ') : '';
             const aText = q.answer ? q.answer.trim().replace(/\s+/g, ' ') : '';
-            
+
             // Unique key for deduplication
             const key = `${qText}|||${aText}`;
 
@@ -42,15 +42,16 @@ const dedupeFile = (filePath) => {
 
         // Sort questions alphabetically by questiontext
         uniqueQuestions.sort((a, b) => {
-            const textA = (a.questiontext || '').trim().toLowerCase();
-            const textB = (b.questiontext || '').trim().toLowerCase();
-            return textA.localeCompare(textB, 'vi');
+            // const textA = (a.questiontext || '').trim().toLowerCase();
+            // const textB = (b.questiontext || '').trim().toLowerCase();
+            // return textA.localeCompare(textB, 'vi');
+            return a.id.localeCompare(b.id, 'vi');
         });
 
         const duplicatesRemoved = originalCount - uniqueQuestions.length;
 
         data.questions = uniqueQuestions;
-        
+
         // Update metadata.total if it exists
         if (data.metadata) {
             data.metadata.total = uniqueQuestions.length;
@@ -58,7 +59,7 @@ const dedupeFile = (filePath) => {
 
         // Write back to file with 4-space indentation
         fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf8');
-        
+
         if (duplicatesRemoved > 0) {
             console.log(`[${path.basename(filePath)}] Removed ${duplicatesRemoved} duplicates & sorted. Final count: ${uniqueQuestions.length}`);
         } else {
@@ -79,7 +80,7 @@ const main = () => {
     }
 
     const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json'));
-    
+
     if (files.length === 0) {
         console.log("No JSON files found in data directory.");
         return;
